@@ -1,4 +1,4 @@
-# H-Piper: A Deep Learning Framework in Halide
+# Proposal
 \- Lei Sun, Yang Wu
 
 ### SUMMARY
