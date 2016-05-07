@@ -3,7 +3,7 @@
 # ----------------------- #
 
 url: dylansunlei.com
-baseurl: "/H-Piper/"
+baseurl: "/H-Piper"
 title: "H-Piper: A Deep Learning Framework in Halide"
 email: your-email@domain.com
 author: "Ian Wu, Dylan Sun"
