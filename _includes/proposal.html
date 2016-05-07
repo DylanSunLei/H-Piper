@@ -4,9 +4,135 @@
         <br/><br/>
        
     
-{% markdown %}
-{% include proposal.md %}
-{% endmarkdown %}
+<!-- {% markdown %} -->
+<!-- {% include proposal.md %} -->
+<!-- {% endmarkdown %} -->
+
+<h1 id="proposal">Proposal</h1>
+
+<p>- Lei Sun, Yang Wu</p>
+
+
+
+<h3 id="summary">SUMMARY</h3>
+
+<p><strong>H-Piper</strong> is our final project for 15418.</p>
+
+<p>We are going to build a powerful, flexible, generic, and highly-balanced framework for deep learning Nets, in <a href="http://halide-lang.org/">Halide</a>. We named our framework <strong>H-Piper</strong>. We will embed popular neural networks like VGG, CNN, and Google Inception Net in our framework and we enable user to define own Neural Networks by privoding a simple configuration files. We will extend our input processor to support popular inputs like protobuf, json, and etc.</p>
+
+<p>If time permits, we’d like to hand-tune our framework schedule (Halide’s feature) and compete with Caffe and MXNet. Also, we could leverage the existing Halide Auto-Scheduler developed by Ravi to generate an automatic schedule to compete with Caffe and MXNet. </p>
+
+<p>Our framework will be extremely useful for Halide Auto-scheduler to test their performance on different Neural Net and it will be a great performance reference for users who are interested in getting higher performance.</p>
+
+
+
+<h3 id="background">BACKGROUND</h3>
+
+<p>MXNet and Caffe are the most popular frameworks for deep learning. Both frameworks are implemented in cpp and are carefully hand-tuned. Hand-tuning in cpp could be painful. Changes’ correctness needs to be verified everytime and the amount of changes for the most simple reschedule is a lot. </p>
+
+<p>Halide is a new programming language designed to make it easier to write high-performance image processing code on modern machines. It provides a concept of “scheduling” which allows developers to easily define he or she wants to iterate through the dataset. The amount to be changed is quite trivial. The correctness will be not affected heavily if only the schedule is changed. </p>
+
+<p>It’s always interesting to explore the best tradeoff between parallelism and locality. With Halide, developers could explore the best tradeoff much faster with less frastration. </p>
+
+<p><a href="http://drona.csa.iisc.ernet.in/~uday/publications/uday15asplos.pdf">PolyMage</a> focus on automatically generating high-performance implementations of image processing pipelines expressed in a high-level declarative language. “Experimental results on a modern multicore system show that the performance achieved by our automatic approach is up to 1.81× better than that achieved through manual tuning in Halide, a state-of-the-art language and compiler for image processing pipelines.”</p>
+
+
+
+<h3 id="the-challenge">THE CHALLENGE</h3>
+
+<ol>
+<li>We need to figure out the scope of our framework. Surely we want to be general enough and support everything but given the fact that we only have couple of weeks to build this. It might not be as general as Caffe or MXNet.</li>
+<li>We need to explore the locality possibilities between two layers in any neural network. To check if we could fuse two layres together and the compare the performance.</li>
+<li>Consumer different type of inputs and provide APIs to make it easy for use to migrate to our Framework.</li>
+<li>Primitives of our framework needs to be carefully designed to allow user define a pipeline or customized neural net easily.</li>
+<li>There might be some difficulties to get auto-schedule from PolyMage since we don’t have it in control. At the end, we might have to bear with our hand-tune performance. </li>
+</ol>
+
+<p><strong>WORKLOAD</strong></p>
+
+<p>And we think the cache footprint would be pretty huge in convolution, although the convolution step does not have strong dependency, locality in convolution won’t affect too much. We think there should be some optimization in terms of how to explore the footprint in memory and Halide makes it easy to define the way we want to handle the workload.</p>
+
+<p>Also the backpropagation could be requires intensive computation and some intermeida differential result for chain rule.</p>
+
+<p><strong>CONSTRAINTS</strong> <br>
+<!-- Describe constraints: What are the properties of the system that make mapping the workload to it challenging? --> <br>
+The forward and backpropagation might leave more memory footprint than a machine in cluster can have. We need to find a decomposition method to reduce the affect of that.</p>
+
+<p>Also, if we add padding in matrix to avoid the data shrink too quickly, there can be diversity in work load of different threads or even machines. We have to find a optimized work schedule logic to balance the load.</p>
+
+
+
+<h3 id="resources">RESOURCES</h3>
+
+<p>We are going to use GHC machines, and start form scratch in Halide. We will implement<a href="http://www.cs.unc.edu/~wliu/papers/GoogLeNet.pdf">Google Inception Net</a> first. There are some implementation in <a href="https://github.com/XiaoxiaoGuo/caffe-stn">Caffe</a> and <a href="https://github.com/skaae/recurrent-spatial-transformer-code">Python</a>, we will try to compete their performance. </p>
+
+<p><a href="https://github.com/google/inception">This Git</a> has some helpful informations about how to implement this net.</p>
+
+<p>More reference will be added if we find some useful reference paper/implementations. </p>
+
+
+
+<h3 id="goals-and-deliverables">GOALS AND DELIVERABLES</h3>
+
+<p><!-- Describe the deliverables or goals of your project. --> <br>
+<strong>PLAN TO ACHIEVE</strong> <br>
+1. A Working Google Inception Net in Halide <br>
+2. A working deep learning framework in Halide which supports CNN, Inception Net, and VGG.</p>
+
+<p><strong>HOPE TO ACHIEVE</strong></p>
+
+<ol>
+<li>Automatic Schedule generated by PolyMage and the speedup observed from hand-tuned version.</li>
+<li>Performance compete with Caffe, MXNet on Inception Net, VGG, CNN, and etc.</li>
+</ol>
+
+
+
+<h3 id="platform-choice">PLATFORM CHOICE</h3>
+
+<p>We choose to use lateday clusters as our platform and Halide as our language.</p>
+
+<p>As for Halide language. First of all, it is a DSL for image processing, which gives it advantages in this project as we are using image data set; also the tuning producure can be more easier and efficient in Halide than other languages like C++: by only defineing schedule, we can try more configures in short time. And as Professor Kayvon shows, it is usually faster to find optimal settings in Halide.</p>
+
+
+
+<h3 id="schedule">SCHEDULE</h3>
+
+<table>
+<thead>
+<tr>
+  <th align="left">Timeline</th>
+  <th align="left">Goal to achieve</th>
+</tr>
+</thead>
+<tbody><tr>
+  <td align="left">April 8</td>
+  <td align="left">Understand Google Inception Net’s Layers and how does they work</td>
+</tr>
+<tr>
+  <td align="left">April 15</td>
+  <td align="left">Scratch the framework and define primitives</td>
+</tr>
+<tr>
+  <td align="left">April 22</td>
+  <td align="left">Implement the framework in Halide and test on CIFAR-10 dataset</td>
+</tr>
+<tr>
+  <td align="left">April 29</td>
+  <td align="left">Tune different schedule to improve performance, contact PolyMage for automatic shedule, and compete with Caffe and MXNet</td>
+</tr>
+<tr>
+  <td align="left">May 7</td>
+  <td align="left">Wrap up implementatin and compare/analyse the performance in report</td>
+</tr>
+</tbody></table>
+
+
+<p><!-- - April 8:  Understand Google Inception Net's Layers and how does they work --> <br>
+<!-- - April 15:  Scratch the framework and define primitives --> <br>
+<!-- - April 22: Implement the framework in Halide and test on CIFAR-10 dataset --> <br>
+<!-- - April 29:  Tune different schedule to improve performance, contact PolyMage for automatic shedule, and compete with Caffe and MXNet  --> <br>
+<!-- - May 7: Wrap up implementatin and compare/analyse the performance in report --></p>
     
 </div>
 </section>

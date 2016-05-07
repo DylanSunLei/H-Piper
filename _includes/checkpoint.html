@@ -4,9 +4,131 @@
 	<br/><br/>
        
     
-{% markdown %}
-{% include checkpoint.md %}
-{% endmarkdown %}
+<!-- {% markdown %} -->
+<!-- {% include checkpoint.md %} -->
+<!-- {% endmarkdown %} -->
+
+<h1 id="checkpoint">Checkpoint</h1>
+
+
+
+<h2 id="progress-review">Progress review</h2>
+
+<p>We finished literature review for the project in the first two weeks after submitting the proposal. After understanding that Google Inception Net contains 8 unique layers and they can be used to construct CNN and VGG and other nets, we decide to focus on implementing Google Inception net, which essentially is implementing the 8 unique layers.</p>
+
+<p>We are currently stuck on building caffe2 in latedays cluster. There are many dependencies missing. While waiting for instructors to help, we decide to move on and build our own libraies or proceed with Halide implementation first.</p>
+
+
+
+<h3 id="schedule">SCHEDULE</h3>
+
+<table>
+<thead>
+<tr>
+	<th align="left">Timeline</th>
+	<th align="left">Goal to achieve</th>
+	<th align="left">Progress</th>
+</tr>
+</thead>
+<tbody><tr>
+	<td align="left">April 8</td>
+	<td align="left">Understand Google Inception Net’s Layers and how does they work</td>
+	<td align="left">Done</td>
+</tr>
+<tr>
+	<td align="left">April 15</td>
+	<td align="left">Scratch the framework and define primitives</td>
+	<td align="left">Done</td>
+</tr>
+<tr>
+	<td align="left">April 22</td>
+	<td align="left">Implement the framework in Halide and test on CIFAR-10 dataset</td>
+	<td align="left">Ongoing</td>
+</tr>
+<tr>
+	<td align="left">April 29</td>
+	<td align="left">Tune different schedule to improve performance, contact PolyMage for automatic shedule, and compete with Caffe and MXNet</td>
+	<td align="left">Not Started</td>
+</tr>
+<tr>
+	<td align="left">May 7</td>
+	<td align="left">Wrap up implementatin and compare/analyse the performance in report</td>
+	<td align="left">Not Started</td>
+</tr>
+</tbody></table>
+
+
+
+
+<h2 id="updated-goal-and-deliverables">Updated Goal and Deliverables</h2>
+
+<p>We’ve put lots of hours to build caffe and caffe2 on lateday cluster. We decide to make our scope to be only support protobuf and json input. We could expend the supported input in the future. For now, the ability of taking in protobuf and json is the most important.</p>
+
+<p>Also, We decide to focus on implementation of our H-Piper framework instead of tuning scheduling. To have this framework ready could help investigate locality-parallelism tradeoff and also PolyMage could benifit from our framework by testing its automatically generated schedules on different nets.</p>
+
+<p>The Performance Compete will be done between Caffe’s performance VS PolyMage Schedule’s performance.</p>
+
+
+
+<h2 id="what-to-show-in-parallelism-competition">What to Show in Parallelism Competition</h2>
+
+<p>We want to show the comparison of the performance of our hand-tuned schedule, the performance of PolyMage automatic schedule, and the performance of Caffe2. So it will be a graph. I think it will be nice to have a demo to show how easy it is to configure a net but given that we only have 6 minutes, we might not do this demo.</p>
+
+
+
+<h2 id="preliminary-results">Preliminary Results</h2>
+
+<p>We don’t have any results for now. We are still working on the correctness of our framework.</p>
+
+
+
+<h2 id="issues">Issues</h2>
+
+<ul>
+<li>We don’t know how to write fast halide schedule</li>
+<li>Working on installing dependencies to build caffe2 on lateday clusters</li>
+<li>Some questions about Layers implementation of Google Inception Net. For example, there are two possible way to implement Inception Layer. We don’t know which one to choose.</li>
+<li>Our biggest concern is the time. We are working hard now and try to finish our plans in time.</li>
+</ul>
+
+
+
+<h2 id="new-schedule-with-task">New Schedule with task</h2>
+
+<table>
+<thead>
+<tr>
+	<th align="left">Timeline</th>
+	<th align="left">People</th>
+	<th align="left">Task</th>
+</tr>
+</thead>
+<tbody><tr>
+	<td align="left">April 22</td>
+	<td align="left">Lei Sun</td>
+	<td align="left">Maxpool Layer, Softmax Layer Implementation</td>
+</tr>
+<tr>
+	<td align="left">April 22</td>
+	<td align="left">Yang Wu</td>
+	<td align="left">Protobuf Input Parser and Data Layer</td>
+</tr>
+<tr>
+	<td align="left">April 29</td>
+	<td align="left">Lei Sun</td>
+	<td align="left">Test cases build. Caffe2 Dependencies.</td>
+</tr>
+<tr>
+	<td align="left">April 29</td>
+	<td align="left">Yang Wu</td>
+	<td align="left">Conv Layer, DepthConcat Layer,  Net Creation</td>
+</tr>
+<tr>
+	<td align="left">May 7</td>
+	<td align="left">Lei Sun, Yang Wu</td>
+	<td align="left">Wrap up implementatin and compare/analyse the performance in report</td>
+</tr>
+</tbody></table>
     
 
 
