@@ -2,7 +2,7 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://dylansunlei.com
+url: dylansunlei.com
 baseurl: "/H-Piper/"
 title: "H-Piper: A Deep Learning Framework in Halide"
 email: your-email@domain.com
