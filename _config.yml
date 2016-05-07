@@ -4,7 +4,7 @@
 
 url: dylansunlei.com
 baseurl: "/H-Piper"
-title: "H-Piper: A Deep Learning Framework in Halide"
+title: "H-Piper: A Deep Learning Framework for Image Pipelines in Halide"
 email: your-email@domain.com
 author: "Ian Wu, Dylan Sun"
 description: > # "Write an awesome description for your new site here. 
@@ -37,3 +37,11 @@ social:
     name: github
     url: https://github.com/wy4515/H-Pipe
     
+    
+people:
+- title: linkedin
+  name: Yang Wu (Ian)
+  url: "#Proposal"
+- title: linkedin
+  name: Lei Sun (Dylan)
+  url: https://sg.linkedin.com/in/lei-sun-33949357
