@@ -7,6 +7,120 @@
 
 <h1 id="final_report">Final Write Up</h1>
 
+<h1 id="h-piper-a-image-pipeline-framework-in-halide">H-Piper: A Image Pipeline Framework in Halide</h1>
+
+<p>- Lei Sun, Yang Wu</p>
+
+
+
+<h2 id="summary">SUMMARY</h2>
+
+<p><strong>H-Piper</strong> is our final project for 15418.</p>
+
+<p>We proposed H-Piper, a powerful, flexible, and highly-balanced framework for deep learning Nets. User can easily generate customized image pipelines by providing config files. We tested our framework on VGG and Inception Network on latedays node. With our 10 basic layers, we were able to implemente vgg network and inception networks (incompleted). The idea of our project is given network definitions and weights, H-Piper would build the network and run forward. Not only H-Piper could be used to study the best optimization strategies for different nets, but it could also be a performance reference. We’ve tested H-Piper with VGG and Inception Net on Latedays clusters.</p>
+
+
+
+<h2 id="background">BACKGROUND</h2>
+
+<p>MXNet and Caffe are pretty popular frameworks for image processing pipelines. Both frameworks are carefully hand-tuned and have outstanding performance. Hand-tuning for image pipelines could be very painful. Changes’ correctness needs to be verified everytime and the amount of code needs to be changed for the most simple reschedule is a lot.</p>
+
+<p>Halide is a Domain-Specific language designed to make it easier to write high-performance image processing code on modern machines. It provides a concept of “scheduling” which allows developers to easily define he or she wants to iterate through the dataset. Below are some schedule examples. (1. 4*4 Tile.  2. Vectorize. 3. box with x split by three. 4. tiles in parallel.)</p>
+
+<img src="http://halide-lang.org/tutorials/figures/lesson_05_tiled.gif" alt="" width="150" height="150">
+
+<img src="http://halide-lang.org/tutorials/figures/lesson_05_vectors.gif" alt="" width="150" height="150">
+
+<img src="http://halide-lang.org/tutorials/figures/lesson_05_split_7_by_3.gif" alt="" width="150" height="150">
+
+<img src="http://halide-lang.org/tutorials/figures/lesson_05_parallel_tiles.gif" alt="" width="150" height="150">
+
+<p>We implemened 10 layers in H-Piper using Halide. Each layer’s schedule could be defined seperately. Given a net definition, H-Piper can create the net and load the parameters using the pool of layers. Each layer could be defined it’s own schedule seperately which allows users to explore optimization strategies. Also, new fused layer could be defined to reduce memory footprint. For instance, we could define a ‘convpool’ layer to fuse max/average pool layer after a convolutional layer. H-Piper is flexible and easy to use.</p>
+
+
+
+<img src="https://googledrive.com/host/0B4UghwZkkdyVeWFBVFdjSXJ1dHM" alt="H-Piper Structure" title="H-Piper Structure" width="400">
+
+<img src="https://googledrive.com/host/0B4UghwZkkdyVTHYtV3ZMb19NWTA" alt="H-Piper Structure" title="H-Piper Structure" width="400">
+
+<p>Hand-tuning in Halide scheduler is much easier than python or cpp. However, it’s still painful and tedious when we need to account for both parallelism and locality. We’ve encountered an interesting paper [1] by Ravi Teja Mullapudi. It introduces a domain-specific language and compiler for image processing pipelines, PolyMage. PolyMage could generate approximate optimal schedule for Halide programs automatically. Below is the result where PolyMage is racing the Halide Experts from Google.</p>
+
+<img src="https://googledrive.com/host/0B4UghwZkkdyVSE5ZSWhaT3lYVkE" alt="H-Piper Structure" title="H-Piper Structure" width="350">
+
+
+<p>PolyMage is another motivaiton of us to implement a framework in Halide. Google Inception Net has 156 layers. Hand tuning inception net could be the last thing we want to do. But with the help of PolyMage, we could potentially get a schedule which is approximate optimal in few minutes. To integrated with <a href="http://drona.csa.iisc.ernet.in/~uday/publications/uday15asplos.pdf">PolyMage</a> for automatic scheduler, every layer should provide size in dimensions. However, <a href="https://github.com/halide/Halide/blob/master/src/Func.h">Halide::Func</a> does not provide such information. Therefore, we extent our implementation for this dimension-based information as well.</p>
+
+
+
+<h2 id="approach">APPROACH</h2>
+
+<p>Since most image piplines could be presented by a combination of different layers, we implemeted a few baisc layers: <em>data_layer, avg_pool_layer, concat_layer, conv_layer, flat_layer, fully_conn_layer, lrn_layer, max_pool_layer, relu_layer, softmax_layer</em>.</p>
+
+<p>Each layer has similar signature:</p>
+
+
+
+<pre class="prettyprint"><code class="language-c++ hljs cs"><span class="hljs-comment">// `forward` is the output of this layer</span>
+Halide::Func forward(x, y, z, n);
+
+<span class="hljs-comment">// feed the layer with the output of the other</span>
+Layer (<span class="hljs-keyword">int</span>...<span class="hljs-keyword">params</span>, Layer *input);
+
+<span class="hljs-comment">// give output's number of dimensions</span>
+<span class="hljs-keyword">int</span> out_dims();
+
+<span class="hljs-comment">// give output's size in one dimension</span>
+<span class="hljs-keyword">int</span> out_dim_size(<span class="hljs-keyword">int</span> i);</code></pre>
+
+<p>For example we want to build a network that fed a image for input and then continues with a convolution computation, we would just doing this in H-Piper:</p>
+
+
+
+<pre class="prettyprint"><code class="language-c++ hljs r">// generate a data layer from image
+Halide::Image&lt;float&gt; data = load_image();
+DataLayer* data_layer = new DataLayer(h, w, ch, n, data);
+
+Convolutional* conv_layer  = new Convolutional(int...params, data_layer);
+<span class="hljs-keyword">...</span> </code></pre>
+
+<p>With H-Piper’s basic layers, most of image pipelines become building blocks. As long as we have correct input-output mapping and parameters defined, H-Piper would do the heavy lifting in computations for you.</p>
+
+<p>Also, during our development, we accidentally trigger an <a href="https://github.com/halide/Halide/blob/master/src/Buffer.cpp#L12">assert</a> in Halide, before we fix the bug, our workaround was spliting the kernel filter that exceed buffer limitations into 2 kernels by 4th dimension and concat together after computation. Although it was caused by a dimension error in our implementatin, but this check actually allowed us to handle different size of filters more flexible.</p>
+
+
+
+<h2 id="results">RESULTS</h2>
+
+
+<p>First We run a complete VGG network with H-Piper, and explore some scheduler strategy for every layer of network: <br>
+- 1. no schedule <br>
+- 2. parallel softmax layer <br>
+- 3. parallel maxpool layer <br>
+- 4. parallel conv layer <br>
+- 5. reorder conv layer <br>
+- 6. reorder + parallel conv layer</p>
+
+<p>This is our result, x-axis is the schedule we were trying and y-axis is the time cost: <br>
+<img src="https://docs.google.com/spreadsheets/d/1DVGrHmwrwSQpoLAySiYdZn9X7W8N0-TnpNACT1w4zY8/pubchart?oid=296431700&amp;format=image" alt="chart" title=""></p>
+
+<p>And we have a few observations from the chart: <br>
+- Most of time in Halide pipelines are cost in computation rather in network creation. This is because in creation phase, there is no actual work being done, but define input/output of Halide::Func. And this is also a reason why fusion in Halide can be gained easily. <br>
+- Convolution layer dominates the performance of VGG, since the updates of other types of layers does not affect the performance in a similar way as convolution layer. <br>
+- HAND-TUNING IS PAINFUL. It is not true that a ‘sophisticated’ strategy would guarantee a better performance. Actually in the chart, we can see purely parallel would get worse performance. And also, there is no one-for-all general scheduler for layers. For example, parallel over channels seems to be a reasonable approach, but in case of fully-connected layer accross channels, this is not practical any more. In short, schedule must be defined based on filter size, input image and computation type.</p>
+
+<p>We've also implemented all layers needed for a google inception net. Our framework would be able to take in a protobuf and create an Inception Net. The tuning for this net is crazy so we decide to use PolyMage to test this speedup once we get the access to PolyMage.</p>
+
+
+
+<h2 id="references">REFERENCES</h2>
+
+<p>[1] C. Szegedy, W. Liu, Y. Jia 2015, Going Deeper with Convolutions</p>
+
+<p>[2] R. Mullapudi, V. Vasista and U. Bondhugula 2016, PolyMage: Automatic Optimization for Image Processing Pipelines</p>
+
+<p>[3] ICLR 2015, Very Deep Convolutional Networks For Large-scale Image Recognition</p>
+
+<hr>
 
 
                 <br/>
